@@ -36,35 +36,39 @@
             color: var(--text);
             line-height: 1.6;
         }
+        /* Header — compact single row */
         .header {
             background: var(--surface);
             border-bottom: 1px solid var(--border);
-            padding: 20px 0;
+            padding: 10px 0;
             position: sticky;
             top: 0;
             z-index: 100;
             box-shadow: var(--shadow);
         }
         .header-inner {
-            max-width: 900px;
+            max-width: 960px;
             margin: 0 auto;
             padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         .header h1 {
-            font-size: 1.5rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            margin-bottom: 12px;
+            white-space: nowrap;
         }
         .header h1 a {
             text-decoration: none;
             color: var(--text);
         }
         .search-box {
-            width: 100%;
-            padding: 10px 16px;
+            flex: 1;
+            padding: 7px 14px;
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            font-size: 1rem;
+            font-size: 0.9rem;
             background: var(--bg);
             color: var(--text);
             outline: none;
@@ -73,26 +77,43 @@
         .search-box:focus {
             border-color: var(--accent);
         }
-        .stats {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-top: 8px;
+        .header-btn {
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.15s;
         }
+        .header-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .stats {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        /* Layout */
         .container {
-            max-width: 900px;
+            max-width: 960px;
             margin: 0 auto;
             padding: 20px;
         }
+        /* Word list */
         .word-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
         }
         .word-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 14px 16px;
+            padding: 12px 14px;
             cursor: pointer;
             transition: all 0.15s;
             text-decoration: none;
@@ -106,135 +127,87 @@
         }
         .word-card .word-name {
             font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 4px;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
         }
         .word-card .word-phonetic {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
         }
         /* Word detail view */
-        #word-view {
-            display: none;
+        #word-view { display: none; }
+        #word-view.active { display: flex; gap: 20px; }
+        #list-view.hidden { display: none; }
+        /* TOC sidebar */
+        .toc {
+            width: 180px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 60px;
+            align-self: flex-start;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
         }
-        #word-view.active {
+        .toc-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .toc a {
             display: block;
-        }
-        #list-view.hidden {
-            display: none;
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text);
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
+            padding: 3px 0 3px 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-left: 2px solid transparent;
             transition: all 0.15s;
         }
-        .back-btn:hover {
-            border-color: var(--accent);
+        .toc a:hover, .toc a.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+        .toc a.sub {
+            padding-left: 24px;
+            font-size: 0.8rem;
+        }
+        .word-detail {
+            flex: 1;
+            min-width: 0;
         }
         .markdown-body {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 32px;
+            padding: 28px 32px;
             box-shadow: var(--shadow);
         }
-        .markdown-body h1 {
-            font-size: 2rem;
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--border);
-        }
-        .markdown-body h2 {
-            font-size: 1.4rem;
-            margin-top: 32px;
-            margin-bottom: 16px;
-            color: var(--accent);
-        }
-        .markdown-body h3 {
-            font-size: 1.15rem;
-            margin-top: 24px;
-            margin-bottom: 12px;
-        }
-        .markdown-body table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-            font-size: 0.9rem;
-        }
-        .markdown-body th, .markdown-body td {
-            border: 1px solid var(--border);
-            padding: 10px 14px;
-            text-align: left;
-        }
-        .markdown-body th {
-            background: var(--accent-light);
-            font-weight: 600;
-        }
-        .markdown-body tr:nth-child(even) {
-            background: var(--bg);
-        }
-        .markdown-body blockquote {
-            border-left: 4px solid var(--accent);
-            padding: 12px 20px;
-            margin: 16px 0;
-            background: var(--accent-light);
-            border-radius: 0 var(--radius) var(--radius) 0;
-        }
-        .markdown-body code {
-            background: var(--accent-light);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-        .markdown-body pre {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 16px;
-            overflow-x: auto;
-            margin: 16px 0;
-        }
-        .markdown-body pre code {
-            background: none;
-            padding: 0;
-        }
-        .markdown-body hr {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 24px 0;
-        }
-        .markdown-body ul, .markdown-body ol {
-            padding-left: 24px;
-            margin: 12px 0;
-        }
-        .markdown-body li {
-            margin: 6px 0;
-        }
-        .markdown-body strong {
-            color: var(--text);
-        }
-        .mermaid {
-            margin: 20px 0;
-            text-align: center;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
+        .markdown-body h1 { font-size: 1.8rem; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
+        .markdown-body h2 { font-size: 1.3rem; margin-top: 28px; margin-bottom: 14px; color: var(--accent); scroll-margin-top: 70px; }
+        .markdown-body h3 { font-size: 1.1rem; margin-top: 22px; margin-bottom: 10px; scroll-margin-top: 70px; }
+        .markdown-body table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+        .markdown-body th, .markdown-body td { border: 1px solid var(--border); padding: 9px 12px; text-align: left; }
+        .markdown-body th { background: var(--accent-light); font-weight: 600; }
+        .markdown-body tr:nth-child(even) { background: var(--bg); }
+        .markdown-body blockquote { border-left: 4px solid var(--accent); padding: 12px 20px; margin: 14px 0; background: var(--accent-light); border-radius: 0 var(--radius) var(--radius) 0; }
+        .markdown-body code { background: var(--accent-light); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        .markdown-body pre { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; overflow-x: auto; margin: 14px 0; }
+        .markdown-body pre code { background: none; padding: 0; }
+        .markdown-body hr { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+        .markdown-body ul, .markdown-body ol { padding-left: 24px; margin: 10px 0; }
+        .markdown-body li { margin: 5px 0; }
+        .markdown-body strong { color: var(--text); }
+        .mermaid { margin: 18px 0; text-align: center; }
+        .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
+        /* Responsive */
+        @media (max-width: 700px) {
+            .header-inner { flex-wrap: wrap; }
+            .search-box { order: 10; width: 100%; }
+            .toc { display: none; }
+            #word-view.active { display: block; }
         }
     </style>
 </head>
@@ -243,7 +216,8 @@
         <div class="header-inner">
             <h1><a href="#" id="home-link">📖 Dict Hub</a></h1>
             <input type="text" class="search-box" id="search" placeholder="Search words..." autocomplete="off">
-            <div class="stats" id="stats"></div>
+            <button class="header-btn" id="random-btn">Random</button>
+            <span class="stats" id="stats"></span>
         </div>
     </div>
 
@@ -253,8 +227,13 @@
             <div class="empty-state" id="empty-state" style="display:none;">No matching words found.</div>
         </div>
         <div id="word-view">
-            <button class="back-btn" id="back-btn">← Back to list</button>
-            <div class="markdown-body" id="word-content"></div>
+            <div class="word-detail">
+                <div class="markdown-body" id="word-content"></div>
+            </div>
+            <nav class="toc" id="toc">
+                <div class="toc-title">Contents</div>
+                <div id="toc-links"></div>
+            </nav>
         </div>
     </div>
 
@@ -303,12 +282,47 @@
             return div.innerHTML;
         }
 
+        function randomWord() {
+            if (!words.length) return;
+            const w = words[Math.floor(Math.random() * words.length)];
+            showWord(encodeURIComponent(w.word));
+        }
+
+        function buildTOC(contentEl) {
+            const tocLinks = document.getElementById('toc-links');
+            const headings = contentEl.querySelectorAll('h2, h3');
+            tocLinks.innerHTML = '';
+            headings.forEach((h, i) => {
+                const id = 'heading-' + i;
+                h.id = id;
+                const a = document.createElement('a');
+                a.href = '#' + id;
+                a.textContent = h.textContent;
+                if (h.tagName === 'H3') a.className = 'sub';
+                tocLinks.appendChild(a);
+            });
+            // Highlight active heading on scroll
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    const link = tocLinks.querySelector(`a[href="#${entry.target.id}"]`);
+                    if (link) {
+                        if (entry.isIntersecting) {
+                            tocLinks.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+                            link.classList.add('active');
+                        }
+                    }
+                });
+            }, { rootMargin: '-80px 0px -70% 0px' });
+            headings.forEach(h => observer.observe(h));
+        }
+
         async function showWord(word) {
             const decoded = decodeURIComponent(word);
             document.getElementById('list-view').classList.add('hidden');
             document.getElementById('word-view').classList.add('active');
             const content = document.getElementById('word-content');
             content.innerHTML = '<div class="loading">Loading...</div>';
+            document.getElementById('toc-links').innerHTML = '';
 
             try {
                 const resp = await fetch(`words/${encodeURIComponent(decoded)}.md`);
@@ -324,6 +338,9 @@
 
                 // Render markdown
                 content.innerHTML = marked.parse(md);
+
+                // Build TOC
+                buildTOC(content);
 
                 // Render mermaid diagrams
                 const mermaidEls = content.querySelectorAll('pre code.language-mermaid');
@@ -373,7 +390,7 @@
             }
         });
 
-        document.getElementById('back-btn').addEventListener('click', showList);
+        document.getElementById('random-btn').addEventListener('click', randomWord);
         document.getElementById('home-link').addEventListener('click', (e) => {
             e.preventDefault();
             showList();
@@ -382,9 +399,10 @@
             document.getElementById('stats').textContent = `${words.length} words`;
         });
 
-        // Handle direct URL hash
+        // Handle direct URL hash (ignore TOC anchors)
         window.addEventListener('hashchange', () => {
             const hash = window.location.hash.slice(1);
+            if (hash.startsWith('heading-')) return;
             if (hash) {
                 showWord(hash);
             } else if (document.getElementById('word-view').classList.contains('active')) {

@@ -10,44 +10,42 @@ echo "==> Syncing vocabulary files..."
 echo "    Source: $SOURCE_DIR"
 echo "    Target: $TARGET_DIR"
 
-# Create target directory
 mkdir -p "$TARGET_DIR"
 
-# Find all .md files with [[Vocabulary]] in frontmatter
-vocab_files=$(/usr/bin/grep -rl '\[\[Vocabulary\]\]' "$SOURCE_DIR"/*.md 2>/dev/null | sort || true)
+# Find .md files with [[Vocabulary]] in frontmatter only (between first two ---)
+# Use awk to extract frontmatter then grep for the tag
+vocab_files=$(awk '
+    FNR==1 { fm=0; found=0 }
+    /^---$/ { fm++; if (fm==2) { if(found) print FILENAME; next } if(fm==1) next }
+    fm==1 && /\[\[Vocabulary\]\]/ { found=1 }
+' "$SOURCE_DIR"/*.md 2>/dev/null | sort || true)
 
-count=0
-manifest="["
-first=true
-
+# Collect words into temp file (TSV: word<TAB>file<TAB>phonetic)
+tmpfile=$(mktemp)
 while IFS= read -r file; do
     [ -z "$file" ] && continue
-    count=$((count + 1))
-
     filename=$(basename "$file")
     cp "$file" "$TARGET_DIR/$filename"
-
-    # Extract word from filename (remove .md extension)
     word="${filename%.md}"
-
-    # Extract phonetic from file if available
-    phonetic=""
-    if [[ -f "$file" ]]; then
-        phonetic=$(/usr/bin/grep -m1 '音标' "$file" 2>/dev/null | /usr/bin/sed 's/.*| *//' | /usr/bin/sed 's/ *$//' || true)
-    fi
-
-    if [ "$first" = true ]; then
-        first=false
-    else
-        manifest+=","
-    fi
-    manifest+="{\"word\":\"$word\",\"file\":\"$filename\",\"phonetic\":\"$phonetic\"}"
+    phonetic=$(/usr/bin/grep -m1 '音标' "$file" 2>/dev/null | /usr/bin/sed 's/.*| *//' | /usr/bin/sed 's/ *$//' || true)
+    printf '%s\t%s\t%s\n' "$word" "$filename" "$phonetic" >> "$tmpfile"
 done <<< "$vocab_files"
 
-manifest+="]"
+# Generate valid JSON with Python
+python3 -c "
+import json, sys
+words = []
+with open('$tmpfile') as f:
+    for line in f:
+        line = line.strip()
+        if not line:
+            continue
+        parts = line.split('\t', 2)
+        words.append({'word': parts[0], 'file': parts[1], 'phonetic': parts[2] if len(parts) > 2 else ''})
+json.dump(words, open('$REPO_DIR/words.json', 'w'), ensure_ascii=False, indent=2)
+print(f'==> Found {len(words)} vocabulary files')
+print('==> Generated words.json')
+"
 
-echo "$manifest" > "$REPO_DIR/words.json"
-
-echo "==> Found $count vocabulary files"
-echo "==> Generated words.json"
+rm -f "$tmpfile"
 echo "==> Done!"
