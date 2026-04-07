@@ -428,15 +428,21 @@
             window.location.hash = '';
         }
 
-        // Search — sync both inputs
+        // Search — sync both inputs, auto return to list
         function handleSearch(q) {
             q = q.toLowerCase().trim();
             if (!q) { renderList(words); return; }
+            // If viewing a word, go back to list
+            if (document.getElementById('word-view').classList.contains('active')) {
+                showList();
+            }
             const filtered = words.filter(w =>
                 w.word.toLowerCase().includes(q) ||
                 (w.phonetic && w.phonetic.toLowerCase().includes(q))
             );
             renderList(filtered);
+            // Scroll results into view (above keyboard)
+            document.getElementById('word-grid').scrollIntoView({ behavior: 'smooth' });
         }
         searchDesktop.addEventListener('input', (e) => {
             searchMobile.value = e.target.value;
