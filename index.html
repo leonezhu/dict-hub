@@ -241,7 +241,18 @@
         .markdown-body ul, .markdown-body ol { padding-left: 24px; margin: 10px 0; }
         .markdown-body li { margin: 5px 0; }
         .markdown-body strong { color: var(--text); }
-        .mermaid { margin: 18px 0; text-align: center; }
+        .mermaid { margin: 18px 0; text-align: center; cursor: zoom-in; }
+        .mermaid-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 999;
+            overflow: auto;
+            cursor: zoom-out;
+        }
+        .mermaid-overlay.open { display: flex; align-items: center; justify-content: center; }
+        .mermaid-overlay svg { max-width: 95vw; max-height: 95vh; }
         .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
         .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
         /* Responsive */
@@ -259,6 +270,9 @@
     </style>
 </head>
 <body>
+    <!-- Mermaid zoom overlay -->
+    <div class="mermaid-overlay" id="mermaid-overlay"></div>
+
     <!-- Desktop: sticky header -->
     <div class="header">
         <div class="header-inner">
@@ -306,6 +320,17 @@
         });
 
         let words = [];
+
+        // Mermaid zoom
+        const overlay = document.getElementById('mermaid-overlay');
+        overlay.addEventListener('click', () => overlay.classList.remove('open'));
+        document.getElementById('word-content').addEventListener('click', (e) => {
+            const m = e.target.closest('.mermaid');
+            if (m) {
+                overlay.innerHTML = m.innerHTML;
+                overlay.classList.add('open');
+            }
+        });
 
         // Unified search: keeps both inputs in sync
         const searchDesktop = document.getElementById('search-desktop');
