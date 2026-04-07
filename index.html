@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dict Hub - Vocabulary</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #fff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --accent: #4a6fa5;
+            --accent-light: #e8f0fe;
+            --border: #e0e0e0;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a1b1e;
+                --surface: #25262b;
+                --text: #e1e1e1;
+                --text-secondary: #999;
+                --accent: #7ba2d4;
+                --accent-light: #2a3a5c;
+                --border: #3a3b40;
+                --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        .header-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .header h1 a {
+            text-decoration: none;
+            color: var(--text);
+        }
+        .search-box {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-box:focus {
+            border-color: var(--accent);
+        }
+        .stats {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .word-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+            color: var(--text);
+            display: block;
+        }
+        .word-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        .word-card .word-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        .word-card .word-phonetic {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        /* Word detail view */
+        #word-view {
+            display: none;
+        }
+        #word-view.active {
+            display: block;
+        }
+        #list-view.hidden {
+            display: none;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            transition: all 0.15s;
+        }
+        .back-btn:hover {
+            border-color: var(--accent);
+        }
+        .markdown-body {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+        }
+        .markdown-body h1 {
+            font-size: 2rem;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .markdown-body h2 {
+            font-size: 1.4rem;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+        .markdown-body h3 {
+            font-size: 1.15rem;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        .markdown-body th, .markdown-body td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .markdown-body th {
+            background: var(--accent-light);
+            font-weight: 600;
+        }
+        .markdown-body tr:nth-child(even) {
+            background: var(--bg);
+        }
+        .markdown-body blockquote {
+            border-left: 4px solid var(--accent);
+            padding: 12px 20px;
+            margin: 16px 0;
+            background: var(--accent-light);
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+        .markdown-body code {
+            background: var(--accent-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .markdown-body pre {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        .markdown-body pre code {
+            background: none;
+            padding: 0;
+        }
+        .markdown-body hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 24px 0;
+        }
+        .markdown-body ul, .markdown-body ol {
+            padding-left: 24px;
+            margin: 12px 0;
+        }
+        .markdown-body li {
+            margin: 6px 0;
+        }
+        .markdown-body strong {
+            color: var(--text);
+        }
+        .mermaid {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-inner">
+            <h1><a href="#" id="home-link">📖 Dict Hub</a></h1>
+            <input type="text" class="search-box" id="search" placeholder="Search words..." autocomplete="off">
+            <div class="stats" id="stats"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="list-view">
+            <div class="word-grid" id="word-grid"></div>
+            <div class="empty-state" id="empty-state" style="display:none;">No matching words found.</div>
+        </div>
+        <div id="word-view">
+            <button class="back-btn" id="back-btn">← Back to list</button>
+            <div class="markdown-body" id="word-content"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
+        });
+
+        let words = [];
+
+        async function init() {
+            try {
+                const resp = await fetch('words.json');
+                words = await resp.json();
+                renderList(words);
+                document.getElementById('stats').textContent = `${words.length} words`;
+            } catch (e) {
+                document.getElementById('word-grid').innerHTML =
+                    '<div class="loading">Failed to load word list.</div>';
+            }
+        }
+
+        function renderList(list) {
+            const grid = document.getElementById('word-grid');
+            const empty = document.getElementById('empty-state');
+            if (list.length === 0) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            grid.innerHTML = list.map(w => `
+                <a class="word-card" data-word="${encodeURIComponent(w.word)}" href="#${encodeURIComponent(w.word)}">
+                    <div class="word-name">${escapeHtml(w.word)}</div>
+                    ${w.phonetic ? `<div class="word-phonetic">${escapeHtml(w.phonetic)}</div>` : ''}
+                </a>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        async function showWord(word) {
+            const decoded = decodeURIComponent(word);
+            document.getElementById('list-view').classList.add('hidden');
+            document.getElementById('word-view').classList.add('active');
+            const content = document.getElementById('word-content');
+            content.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const resp = await fetch(`words/${encodeURIComponent(decoded)}.md`);
+                if (!resp.ok) throw new Error('Not found');
+                let md = await resp.text();
+
+                // Strip frontmatter
+                md = md.replace(/^---\n[\s\S]*?\n---\n*/, '');
+
+                // Remove Obsidian-specific syntax
+                md = md.replace(/!?\[\[([^\]]+)\]\]/g, '$1');
+                md = md.replace(/<!--.*?-->/g, '');
+
+                // Render markdown
+                content.innerHTML = marked.parse(md);
+
+                // Render mermaid diagrams
+                const mermaidEls = content.querySelectorAll('pre code.language-mermaid');
+                for (const el of mermaidEls) {
+                    const parent = el.parentElement;
+                    const id = 'mermaid-' + Math.random().toString(36).substr(2, 9);
+                    try {
+                        const { svg } = await mermaid.render(id, el.textContent);
+                        parent.innerHTML = `<div class="mermaid">${svg}</div>`;
+                    } catch (e) {
+                        parent.innerHTML = `<pre>${el.textContent}</pre>`;
+                    }
+                }
+            } catch (e) {
+                content.innerHTML = '<div class="loading">Failed to load word content.</div>';
+            }
+        }
+
+        function showList() {
+            document.getElementById('list-view').classList.remove('hidden');
+            document.getElementById('word-view').classList.remove('active');
+            window.location.hash = '';
+        }
+
+        // Search
+        document.getElementById('search').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase().trim();
+            if (!q) {
+                renderList(words);
+                document.getElementById('stats').textContent = `${words.length} words`;
+                return;
+            }
+            const filtered = words.filter(w =>
+                w.word.toLowerCase().includes(q) ||
+                (w.phonetic && w.phonetic.toLowerCase().includes(q))
+            );
+            renderList(filtered);
+            document.getElementById('stats').textContent = `${filtered.length} / ${words.length} words`;
+        });
+
+        // Navigation
+        document.getElementById('word-grid').addEventListener('click', (e) => {
+            const card = e.target.closest('.word-card');
+            if (card) {
+                e.preventDefault();
+                showWord(card.dataset.word);
+            }
+        });
+
+        document.getElementById('back-btn').addEventListener('click', showList);
+        document.getElementById('home-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            showList();
+            document.getElementById('search').value = '';
+            renderList(words);
+            document.getElementById('stats').textContent = `${words.length} words`;
+        });
+
+        // Handle direct URL hash
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.slice(1);
+            if (hash) {
+                showWord(hash);
+            } else if (document.getElementById('word-view').classList.contains('active')) {
+                showList();
+            }
+        });
+
+        // Load on direct hash navigation
+        if (window.location.hash.slice(1)) {
+            init().then(() => showWord(window.location.hash.slice(1)));
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
