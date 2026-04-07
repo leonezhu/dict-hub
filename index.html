@@ -36,7 +36,27 @@
             color: var(--text);
             line-height: 1.6;
         }
-        /* Header — compact single row */
+        /* Search bar — top */
+        .search-bar {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 12px 20px 0;
+        }
+        .search-box {
+            width: 100%;
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            background: var(--surface);
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-box:focus {
+            border-color: var(--accent);
+        }
+        /* Header (desktop: sticky top) */
         .header {
             background: var(--surface);
             border-bottom: 1px solid var(--border);
@@ -63,21 +83,13 @@
             text-decoration: none;
             color: var(--text);
         }
-        .search-box {
+        .header-search {
             flex: 1;
-            padding: 7px 14px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-            background: var(--bg);
-            color: var(--text);
-            outline: none;
-            transition: border-color 0.2s;
         }
-        .search-box:focus {
-            border-color: var(--accent);
+        .header-search .search-box {
+            width: 100%;
         }
-        .header-btn {
+        .nav-btn {
             padding: 7px 14px;
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -88,20 +100,50 @@
             white-space: nowrap;
             transition: all 0.15s;
         }
-        .header-btn:hover {
+        .nav-btn:hover {
             border-color: var(--accent);
             color: var(--accent);
         }
-        .stats {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+        /* Footer (mobile only) */
+        .footer {
+            display: none;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 10px 20px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.08);
+        }
+        .footer-inner {
+            max-width: 960px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .footer h1 {
+            font-size: 1rem;
+            font-weight: 700;
             white-space: nowrap;
+        }
+        .footer h1 a {
+            text-decoration: none;
+            color: var(--text);
+        }
+        .footer-search {
+            flex: 1;
+        }
+        .footer-search .search-box {
+            width: 100%;
         }
         /* Layout */
         .container {
             max-width: 960px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 20px 80px;
         }
         /* Word list */
         .word-grid {
@@ -204,20 +246,38 @@
         .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
         /* Responsive */
         @media (max-width: 700px) {
-            .header-inner { flex-wrap: wrap; }
-            .search-box { order: 10; width: 100%; }
+            .header { display: none; }
+            .search-bar { display: none; }
+            .footer { display: block; }
+            .container { padding: 6px 6px 40px; }
             .toc { display: none; }
             #word-view.active { display: block; }
+            .word-detail { width: 100%; }
+            .markdown-body { padding: 16px; border: none; box-shadow: none; border-radius: 0; }
+            .markdown-body h1 { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
+    <!-- Desktop: sticky header -->
     <div class="header">
         <div class="header-inner">
             <h1><a href="#" id="home-link">📖 Dict Hub</a></h1>
-            <input type="text" class="search-box" id="search" placeholder="Search words..." autocomplete="off">
-            <button class="header-btn" id="random-btn">Random</button>
-            <span class="stats" id="stats"></span>
+            <div class="header-search">
+                <input type="text" class="search-box" id="search-desktop" placeholder="Search words..." autocomplete="off">
+            </div>
+            <button class="nav-btn" id="random-btn-desktop">Random</button>
+        </div>
+    </div>
+
+    <!-- Mobile: fixed footer -->
+    <div class="footer">
+        <div class="footer-inner">
+            <h1><a href="#" id="home-link-mobile">📖</a></h1>
+            <div class="footer-search">
+                <input type="text" class="search-box" id="search-mobile" placeholder="Search..." autocomplete="off">
+            </div>
+            <button class="nav-btn" id="random-btn-mobile">Random</button>
         </div>
     </div>
 
@@ -247,12 +307,15 @@
 
         let words = [];
 
+        // Unified search: keeps both inputs in sync
+        const searchDesktop = document.getElementById('search-desktop');
+        const searchMobile = document.getElementById('search-mobile');
+
         async function init() {
             try {
                 const resp = await fetch('words.json');
                 words = await resp.json();
                 renderList(words);
-                document.getElementById('stats').textContent = `${words.length} words`;
             } catch (e) {
                 document.getElementById('word-grid').innerHTML =
                     '<div class="loading">Failed to load word list.</div>';
@@ -365,20 +428,23 @@
             window.location.hash = '';
         }
 
-        // Search
-        document.getElementById('search').addEventListener('input', (e) => {
-            const q = e.target.value.toLowerCase().trim();
-            if (!q) {
-                renderList(words);
-                document.getElementById('stats').textContent = `${words.length} words`;
-                return;
-            }
+        // Search — sync both inputs
+        function handleSearch(q) {
+            q = q.toLowerCase().trim();
+            if (!q) { renderList(words); return; }
             const filtered = words.filter(w =>
                 w.word.toLowerCase().includes(q) ||
                 (w.phonetic && w.phonetic.toLowerCase().includes(q))
             );
             renderList(filtered);
-            document.getElementById('stats').textContent = `${filtered.length} / ${words.length} words`;
+        }
+        searchDesktop.addEventListener('input', (e) => {
+            searchMobile.value = e.target.value;
+            handleSearch(e.target.value);
+        });
+        searchMobile.addEventListener('input', (e) => {
+            searchDesktop.value = e.target.value;
+            handleSearch(e.target.value);
         });
 
         // Navigation
@@ -390,14 +456,16 @@
             }
         });
 
-        document.getElementById('random-btn').addEventListener('click', randomWord);
-        document.getElementById('home-link').addEventListener('click', (e) => {
-            e.preventDefault();
+        document.getElementById('random-btn-desktop').addEventListener('click', randomWord);
+        document.getElementById('random-btn-mobile').addEventListener('click', randomWord);
+        function goHome() {
             showList();
-            document.getElementById('search').value = '';
+            searchDesktop.value = '';
+            searchMobile.value = '';
             renderList(words);
-            document.getElementById('stats').textContent = `${words.length} words`;
-        });
+        }
+        document.getElementById('home-link').addEventListener('click', (e) => { e.preventDefault(); goHome(); });
+        document.getElementById('home-link-mobile').addEventListener('click', (e) => { e.preventDefault(); goHome(); });
 
         // Handle direct URL hash (ignore TOC anchors)
         window.addEventListener('hashchange', () => {
